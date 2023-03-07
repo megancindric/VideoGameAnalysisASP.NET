@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace ASP_NET_Video_Games_API.Controllers
 {
     //Route evaluates to /api/Games
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class GamesController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace ASP_NET_Video_Games_API.Controllers
         {
             _context = context;
         }
-
+        [Route("[action]")]
         [HttpGet]
         // Return type IActionResult default for .NET API
         public IActionResult GetAllGames()
@@ -36,26 +36,49 @@ namespace ASP_NET_Video_Games_API.Controllers
         [HttpGet]
         public IActionResult GetGameSales(string gameName)
         {
-            var videoGame = _context.VideoGames.Where(vg => vg.Name == gameName);
-            return Ok(videoGame);
+            //Query for all games matching this ID, 
+            var responseDictionary = new Dictionary<string, double>();
+
+            var videoGames = _context.VideoGames.Where(vg => vg.Name == gameName);
+            foreach ( var videoGame in videoGames)
+            {
+                responseDictionary[videoGame.Platform] = videoGame.GlobalSales;
+            }
+            return Ok(responseDictionary);
         }
         [Route("[action]/{year}")]
         [HttpGet]
-        public IActionResult GetConsoleSalesSinceYear(int year)
+        public IActionResult GetPlatformSalesSinceYear(int year)
         {
             //Creating a dictionary to hold response (string and decimal)
             var responseDictionary = new Dictionary<string, double>();
             //Finding all games since the given year
             //Selecting distinct consoles for that year
             //Converting results to list to prevent error when querying within foreach loop
-            var consoles = _context.VideoGames.Where(vg => vg.Year >= year).Select(vg => vg.Platform).Distinct().ToList();
+            var platforms = _context.VideoGames.Where(vg => vg.Year >= year).Select(vg => vg.Platform).Distinct().ToList();
             //Loop through each console, find matching games, sum global sales
-            foreach(string console in consoles)
+            foreach(string platform in platforms)
             {
-                var matchingGameSales = _context.VideoGames.Where(vg => vg.Platform == console && vg.Year >= year).Select(vg => vg.GlobalSales).Sum();
-                responseDictionary.Add(console, matchingGameSales);
+                var matchingGameSales = _context.VideoGames.Where(vg => vg.Platform == platform && vg.Year >= year).Select(vg => vg.GlobalSales).Sum();
+                responseDictionary.Add(platform, matchingGameSales);
             }
             return Ok(responseDictionary);
+        }
+
+        [Route("[action]/{gameName}")]
+        [HttpGet]
+        public IActionResult Search(string gameName)
+        {
+            var matchingGames = _context.VideoGames.Where(vg => vg.Name.Equals(gameName)).ToList();
+            return Ok(matchingGames);
+        }
+
+        [Route("[action]/{platform}")]
+        [HttpGet]
+        public IActionResult SearchByPlatform(string platform)
+        {
+            var matchingGames = _context.VideoGames.Where(vg => vg.Platform.Equals(platform)).ToList();
+            return Ok(matchingGames);
         }
     }
 }
