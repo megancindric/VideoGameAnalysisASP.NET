@@ -1,6 +1,7 @@
 ﻿using ASP_NET_Video_Games_API.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System.Runtime.InteropServices;
 
 namespace ASP_NET_Video_Games_API.Controllers
@@ -22,7 +23,7 @@ namespace ASP_NET_Video_Games_API.Controllers
         public IActionResult GetAllGames()
         {
             // Var sets this as runtime-determined data type
-            var videoGames = _context.VideoGames.ToList();
+            var videoGames = _context.VideoGames.OrderBy(vg => vg.Rank).ToList();
             return Ok(videoGames);
         }
 
@@ -60,6 +61,7 @@ namespace ASP_NET_Video_Games_API.Controllers
             foreach(string platform in platforms)
             {
                 var matchingGameSales = _context.VideoGames.Where(vg => vg.Platform == platform && vg.Year >= year).Select(vg => vg.GlobalSales).Sum();
+             
                 responseDictionary.Add(platform, matchingGameSales);
             }
             return Ok(responseDictionary);
