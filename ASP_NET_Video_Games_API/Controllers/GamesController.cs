@@ -27,6 +27,16 @@ namespace ASP_NET_Video_Games_API.Controllers
             return Ok(videoGames);
         }
 
+        [Route("[action]")]
+        [HttpGet]
+        // Return type IActionResult default for .NET API
+        public IActionResult GetAllGameYears()
+        {
+            // Var sets this as runtime-determined data type
+            var videoGameYears = _context.VideoGames.Select(vg => vg.Year).Distinct().Where(y => y != null).OrderBy(x => x).ToList();
+            return Ok(videoGameYears);
+        }
+
         [HttpGet("{gameId}")]
         public IActionResult GetGameById(int gameId)
         {
