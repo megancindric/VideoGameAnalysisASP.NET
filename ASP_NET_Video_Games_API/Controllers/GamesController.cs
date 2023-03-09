@@ -48,6 +48,7 @@ namespace ASP_NET_Video_Games_API.Controllers
         public IActionResult GetGameSales(string gameName)
         {
             //Query for all games matching this ID, 
+            gameName = gameName.Contains('_') ? gameName.Replace('_', '/') : gameName;
             var responseDictionary = new Dictionary<string, double>();
 
             var videoGames = _context.VideoGames.Where(vg => vg.Name == gameName);
