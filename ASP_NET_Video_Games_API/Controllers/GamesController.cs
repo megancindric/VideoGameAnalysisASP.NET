@@ -37,6 +37,16 @@ namespace ASP_NET_Video_Games_API.Controllers
             return Ok(videoGameYears);
         }
 
+        [Route("[action]")]
+        [HttpGet]
+        // Return type IActionResult default for .NET API
+        public IActionResult getDistinctPlatforms()
+        {
+            // Var sets this as runtime-determined data type
+            var platforms = _context.VideoGames.Select(vg => vg.Platform).Distinct().OrderBy(g => g).ToList();
+            return Ok(platforms);
+        }
+
         [HttpGet("{gameId}")]
         public IActionResult GetGameById(int gameId)
         {
@@ -54,7 +64,7 @@ namespace ASP_NET_Video_Games_API.Controllers
             var videoGames = _context.VideoGames.Where(vg => vg.Name == gameName);
             foreach ( var videoGame in videoGames)
             {
-                responseDictionary[videoGame.Platform] = videoGame.GlobalSales;
+                responseDictionary[videoGame.Platform] = Math.Round(videoGame.GlobalSales,2);
             }
             return Ok(responseDictionary);
         }
@@ -73,7 +83,7 @@ namespace ASP_NET_Video_Games_API.Controllers
             {
                 var matchingGameSales = _context.VideoGames.Where(vg => vg.Platform == platform && vg.Year >= year).Select(vg => vg.GlobalSales).Sum();
              
-                responseDictionary.Add(platform, matchingGameSales);
+                responseDictionary.Add(platform, Math.Round(matchingGameSales, 2));
             }
             return Ok(responseDictionary);
         }
